@@ -1,0 +1,83 @@
+#+TITLE: dplyr 1.0.0
+#+AUTHOR: Cole Brokamp
+#+EMAIL: cole.brokamp@gmail.com
+#+DATE: June 3, 2020
+
+* overview of dplyr
+** dplyr package
+   - "a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges"
+   - extensive dplyr vignettes and articles
+   - dplyr overview and website: [[https://dplyr.tidyverse.org]]  
+   - R for Data Science book: [[https://r4ds.had.co.nz/transform.html][Chapter 5: Data transformation | R for Data Science]]
+   - new dplyr [[https://www.tidyverse.org/blog/2020/06/dplyr-1-0-0/dplyr.png][logo]] and hex sticker
+** common dplyr verbs
+   - ~mutate()~ adds new variables that are functions of existing variables
+   - ~select()~ picks variables based on their names
+   - ~filter()~ picks cases based on their values
+   - ~summarise()~ reduces multiple values down to a single summary
+   - ~arrange()~ changes the ordering of the rows
+** dplyr backends
+   - Large, in memory data: [[https://dtplyr.tidyverse.org/][Data Table Back-End for dplyr • dtplyr]]
+   - Databases: [[https://dbplyr.tidyverse.org/][A dplyr Back End for Databases • dbplyr]]
+   - Apache Spark: [[https://spark.rstudio.com/][sparklyr]]
+   - Simple Features, raster, custom classes
+** dply recent release
+   - version 1.0.0 CRAN-released on June 1st, 2020
+   - release notes and changelog: [[https://github.com/tidyverse/dplyr/releases/tag/v1.0.0][Release dplyr 1.0.0 · tidyverse/dplyr · GitHub]] 
+   - blog posts: [[https://www.tidyverse.org/blog/2020/06/dplyr-1-0-0/dplyr.png][dplyr 1.0.0 available now!]]
+   - teaser example fitting two different models by subgroup
+     #+BEGIN_SRC r
+       library(dplyr, warn.conflicts = FALSE)
+
+       models <- tibble::tribble(
+         ~model_name,    ~ formula,
+         "length-width", Sepal.Length ~ Petal.Width + Petal.Length,
+         "interaction",  Sepal.Length ~ Petal.Width * Petal.Length
+       )
+
+       iris %>% 
+         nest_by(Species) %>% 
+         left_join(models, by = character()) %>% 
+         rowwise(Species, model_name) %>% 
+         mutate(model = list(lm(formula, data = data))) %>% 
+         summarise(broom::glance(model))
+       #> `summarise()` regrouping output by 'Species', 'model_name' (override with `.groups` argument)
+       #> # A tibble: 6 x 13
+       #> # Groups:   Species, model_name [6]
+       #>   Species model_name r.squared adj.r.squared sigma statistic  p.value    df
+       #>   <fct>   <chr>          <dbl>         <dbl> <dbl>     <dbl>    <dbl> <int>
+       #> 1 setosa  length-wi…     0.112        0.0739 0.339      2.96 6.18e- 2     3
+       #> 2 setosa  interacti…     0.133        0.0760 0.339      2.34 8.54e- 2     4
+       #> 3 versic… length-wi…     0.574        0.556  0.344     31.7  1.92e- 9     3
+       #> 4 versic… interacti…     0.577        0.549  0.347     20.9  1.11e- 8     4
+       #> 5 virgin… length-wi…     0.747        0.736  0.327     69.3  9.50e-15     3
+       #> 6 virgin… interacti…     0.757        0.741  0.323     47.8  3.54e-14     4
+       #> # … with 5 more variables: logLik <dbl>, AIC <dbl>, BIC <dbl>, deviance <dbl>,
+       #> #   df.residual <int>
+     #+END_SRC
+
+** use renv to try it out
+   - create isolated, reproducible projects
+   - experiment with new package versions while not impacting existing projects
+   - renv website: [[https://rstudio.github.io/renv/][Project Environments • renv]] 
+* new features in dplyr 1.0.0
+** lifecycle
+   - *deprecated* functions are on their way out and should be replaced in the near future
+   - *superseded* functions aren't going away, but should be replaced in a year or two
+   - *experimental* features are subject to change
+** new implementation based on vctrs package rather than custom C++ code
+   - more of dplyr implemented in R, enabling faster prototyping
+   - standardized approach to handling custom S3 vector types
+   - contributions and extensions easier
+   - [[https://www.tidyverse.org/blog/2020/04/dplyr-1-0-0-and-vctrs/][dplyr 1.0.0 and vctrs - Tidyverse]] 
+** ~select()~ can select columns based on their type; new syntax
+   - [[https://www.tidyverse.org/blog/2020/03/dplyr-1-0-0-select-rename-relocate/][dplyr 1.0.0: select, rename, relocate - Tidyverse]] 
+** ~summarize()~ can create multiple columns and/or rows
+   - [[https://www.tidyverse.org/blog/2020/03/dplyr-1-0-0-summarise/][dplyr 1.0.0: new `summarise()` features - Tidyverse]]
+   - [[https://www.tidyverse.org/blog/2020/05/dplyr-1-0-0-last-minute-additions/][dplyr 1.0.0: last minute additions - Tidyverse]] 
+** better support for row-wise operations
+   - [[https://www.tidyverse.org/blog/2020/04/dplyr-1-0-0-rowwise/][dplyr 1.0.0: working within rows - Tidyverse]] 
+** simpler approach to col-wise operations
+   - [[https://www.tidyverse.org/blog/2020/04/dplyr-1-0-0-colwise/][dplyr 1.0.0: working across columns - Tidyverse]] 
+** programming with dplyr considerably easier
+   - [[https://dplyr.tidyverse.org/dev/articles/programming.html][Programming with dplyr • dplyr]] 
